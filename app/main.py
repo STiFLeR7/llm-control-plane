@@ -1,10 +1,12 @@
 from uuid import uuid4
 from datetime import datetime, timezone
+
 from app.core.risk_classifier import classify_risk
 from app.core.policy_resolver import resolve_policy
 from app.core.eligibility_gate import evaluate_eligibility
 from app.retrieval.retriever import retrieve_context
 from app.retrieval.confidence import score_confidence
+from app.generation.generator import generate_answer
 from app.audit.logger import audit_log
 
 
@@ -12,7 +14,7 @@ def handle_request(user_query: str) -> dict:
     """
     Handle a single user query through the LLM control pipeline.
 
-    This function is deterministic, fully auditable, and safe by default.
+    Deterministic, auditable, and safe by default.
     """
     request_id = str(uuid4())
     timestamp = datetime.now(timezone.utc).isoformat()
@@ -23,7 +25,7 @@ def handle_request(user_query: str) -> dict:
     # 2. Policy resolution
     policy = resolve_policy(risk)
 
-    # 3. Retrieval (may return empty safely)
+    # 3. Grounded retrieval
     retrieval = retrieve_context(user_query, policy)
 
     # 4. Confidence scoring
@@ -32,14 +34,20 @@ def handle_request(user_query: str) -> dict:
     # 5. Eligibility decision
     eligibility = evaluate_eligibility(policy, confidence)
 
-    # 6. Final API-safe response (frontend & Docker ready)
+    # 6. Controlled answer generation (only if allowed)
+    answer = None
+    if eligibility.decision.value == "ALLOW":
+        answer = generate_answer(user_query, retrieval.documents)
+
+    # 7. API-safe response (frontend & Docker ready)
     response = {
         "request_id": request_id,
         "status": eligibility.decision.value,
         "message": eligibility.reason,
+        "answer": answer,
     }
 
-    # 7. Mandatory audit logging (non-negotiable)
+    # 8. Mandatory audit logging (authoritative record)
     audit_log(
         request_id=request_id,
         timestamp=timestamp,
