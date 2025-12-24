@@ -3,22 +3,21 @@ from app.schemas.contracts import ConfidenceScore, RetrievalResult
 
 def score_confidence(retrieval: RetrievalResult) -> ConfidenceScore:
     """
-    Phase 5 confidence heuristic:
-    - multiple documents increase confidence
-    - higher source reliability increases confidence
-    - single weak document limits confidence
+    Phase 6B confidence guardrails:
+    - embeddings do not increase confidence
+    - low candidate diversity caps confidence
     """
+
     if not retrieval.documents:
         return ConfidenceScore(score=0.0)
 
-    doc_count = len(retrieval.documents)
-
-    # reliability is already embedded in retrieval_score indirectly
     base = retrieval.retrieval_score
 
-    # redundancy bonus
-    redundancy_bonus = min(0.2 * (doc_count - 1), 0.4)
+    # Guard 1: single candidate = limited certainty
+    if retrieval.candidate_count == 1:
+        base = min(base, 0.6)
 
-    confidence = min(base + redundancy_bonus, 1.0)
+    # Guard 2: absolute ceiling
+    confidence = min(base, 0.9)
 
     return ConfidenceScore(score=round(confidence, 2))

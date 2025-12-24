@@ -52,10 +52,14 @@ class PolicyDecision:
 class RetrievalResult:
     documents: List[str]
     retrieval_score: float
+    candidate_count: int  # NEW
 
     def to_dict(self) -> dict:
-        return asdict(self)
-
+        return {
+            "documents": self.documents,
+            "retrieval_score": self.retrieval_score,
+            "candidate_count": self.candidate_count,
+        }
 
 @dataclass(frozen=True)
 class ConfidenceScore:
