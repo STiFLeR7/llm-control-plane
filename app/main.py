@@ -37,7 +37,16 @@ def handle_request(user_query: str) -> dict:
     # 6. Controlled answer generation (only if allowed)
     answer = None
     if eligibility.decision.value == "ALLOW":
-        answer = generate_answer(user_query, retrieval.documents)
+        from app.generation.evidence import EvidenceBundle
+
+        bundle = EvidenceBundle(
+            query=user_query,
+            documents=retrieval.documents,
+            confidence=confidence.score,
+        )
+
+        answer = generate_answer(bundle)
+
 
     # 7. API-safe response (frontend & Docker ready)
     response = {

@@ -7,3 +7,4 @@ class Document:
     title: str
     content: str
     source: str
+    reliability: float  # 0.0 – 1.0

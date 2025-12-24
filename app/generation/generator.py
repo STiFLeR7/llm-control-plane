@@ -1,5 +1,14 @@
-def generate_answer(query: str, documents: list[str]) -> str:
+from app.generation.evidence import EvidenceBundle
+
+
+def generate_answer(bundle: EvidenceBundle) -> str:
     """
-    Phase 4 generator: extractive, not generative.
+    Phase 6B generator:
+    - summarization only
+    - no new facts
+    - no advice
     """
-    return documents[0]
+
+    # Placeholder (no LLM yet)
+    # For now, return the most representative document
+    return bundle.documents[0]
