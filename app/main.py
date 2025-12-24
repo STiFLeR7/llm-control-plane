@@ -53,6 +53,9 @@ def handle_request(user_query: str) -> dict:
         "request_id": request_id,
         "status": eligibility.decision.value,
         "message": eligibility.reason,
+        "reason_code": eligibility.reason_code.value,
+        "confidence": confidence.score,
+        "evidence_count": retrieval.candidate_count,
         "answer": answer,
     }
 

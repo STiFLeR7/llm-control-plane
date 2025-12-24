@@ -1,8 +1,13 @@
 from dataclasses import dataclass, asdict
 from enum import Enum
 from typing import List
+from enum import Enum
 
-
+class ReasonCode(str, Enum):
+    POLICY_BLOCK = "policy_block"
+    LOW_CONFIDENCE = "low_confidence"
+    NO_EVIDENCE = "no_evidence"
+    SAFE_TO_ANSWER = "safe_to_answer"
 class RiskCategory(str, Enum):
     MEDICAL = "medical"
     LEGAL = "legal"
@@ -73,9 +78,11 @@ class ConfidenceScore:
 class EligibilityDecision:
     decision: Decision
     reason: str
+    reason_code: ReasonCode
 
     def to_dict(self) -> dict:
         return {
             "decision": self.decision.value,
             "reason": self.reason,
-        }
+            "reason_code": self.reason_code.value,
+        }   

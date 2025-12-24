@@ -91,6 +91,102 @@ The system has been validated against three core invariants:
 
 ---
 
+## 🎨 UI & Demonstration
+
+### Live Control Plane Console
+
+The LLM Control Plane includes a modern, engineering-grade frontend that visualizes the governance pipeline in real-time.
+
+#### Example 1: Factual Query (ALLOW)
+
+![What is AI - ALLOW Response](assets/WhatisAI.png)
+
+**System behavior:**
+- Risk classification: **Low** (factual, informational intent)
+- Confidence: **0.90** (strong retrieval match)
+- Evidence: **Multiple sources** found and ranked
+- **Decision**: `ALLOW` → Answer is rendered
+
+---
+
+#### Example 2: Advisory Query (ABSTAIN - Policy Block)
+
+![Should I Invest - ABSTAIN Response](assets/ShouldIinvest.png)
+
+**System behavior:**
+- Risk classification: **High** (advisory intent detected)
+- Policy: **Blocks** generation regardless of retrieval quality
+- Confidence: **Irrelevant** (policy veto occurs first)
+- Evidence: **Not evaluated** (intent override)
+- **Decision**: `ABSTAIN` → Refusal message shown, answer suppressed
+
+**Key insight**: Even with perfect retrieval, the system refuses. *This is by design.*
+
+---
+
+## 🛑 Why This System Refuses by Design
+
+### The Core Principle
+
+The LLM Control Plane treats **intent as the first-class decision gate**, not confidence or retrieval quality. This inverts the typical RAG architecture:
+
+| Typical RAG | LLM Control Plane |
+|-------------|-------------------|
+| "If we can retrieve it, we can answer it" | "Intent first. Evidence second. Generation last." |
+| Confidence → Allow | Policy + Risk → Confidence → Allow |
+| Hallucination is a failure mode | Hallucination is prevented upstream |
+
+### Why This Matters
+
+#### 1. **Advisory Queries Are Fundamentally Unanswerable**
+
+A question like *"Should I invest in tech stocks?"* is not a knowledge question—it's a judgment call.
+
+- **What we can answer**: "What is the historical performance of tech stocks?"
+- **What we cannot answer**: "Should *you* invest?"
+
+The system detects this intent shift and refuses, not because it lacks information, but because the query requires domain expertise, personal financial context, and fiduciary responsibility. An AI system should never make that claim.
+
+#### 2. **Policy Overrides Evidence**
+
+Consider this scenario:
+```
+Query:     "What is the FDA approval process?"
+Confidence: 0.95 (perfect retrieval)
+Risk:      MEDICAL_ADVICE (advisory pattern detected)
+Policy:    Immediate ABSTAIN
+```
+
+The system *could* answer. But the policy says: *"Not for medical advice, even if we're very confident."*
+
+This is not a bug. **This is the point.** Risk assessment and policy belong in the control plane, not in the LLM's hands.
+
+#### 3. **Refusals Are Intentional, Not Broken**
+
+When you see `ABSTAIN`, it means:
+
+- ✅ The system evaluated the query thoroughly
+- ✅ One or more gates (risk, policy, confidence) were triggered
+- ✅ A refusal was the correct decision
+- ❌ The system did *not* fail silently or hallucinate
+
+Contrast this with a typical LLM that says *"I can't answer that"* — which is actually just the model's learned politeness, not enforced governance.
+
+### The Trade-off
+
+**What we gain:**
+- Trustworthiness (refusals are enforced, not learned)
+- Auditability (every gate logs its decision)
+- Predictability (behavior is deterministic)
+
+**What we sacrifice:**
+- Coverage (some queries are blocked, even if answerable)
+- Optionality (the model cannot override policy)
+
+This trade-off is **intentional** and is the entire reason this system exists.
+
+---
+
 ## 💻 Tech Stack
 
 - **Language**: Python 3.10+
