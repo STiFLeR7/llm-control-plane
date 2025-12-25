@@ -1,3 +1,4 @@
+import os
 from dataclasses import dataclass
 from typing import Optional
 
@@ -12,12 +13,15 @@ class Settings:
     log_dir: str = "logs"
 
     # embeddings
-    embedding_backend: str = "local"  # "local" | "api"
+    embedding_backend: str = os.getenv("EMBEDDING_BACKEND", "local")
     embedding_dim: int = 384
 
-    # api embeddings (optional)
-    embedding_api_provider: Optional[str] = None
-    embedding_api_key: Optional[str] = None
+    # bytez api
+    bytez_api_key: Optional[str] = os.getenv("BYTEZ_API_KEY")
+    bytez_embedding_model: str = os.getenv(
+        "BYTEZ_EMBEDDING_MODEL",
+        "sentence-transformers/all-MiniLM-L6-v2",
+    )
 
 
 settings = Settings()

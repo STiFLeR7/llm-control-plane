@@ -1,2 +1,5 @@
 fastapi
 uvicorn
+bytez
+langchain_bytez
+python-dotenv

@@ -11,7 +11,7 @@ def _normalize(text: str) -> set[str]:
     return set(re.findall(r"[a-z0-9]+", text.lower()))
 
 
-def retrieve_context(query: str, policy) -> RetrievalResult:
+def retrieve_context(query: str, policy, embedding_model: str | None = None) -> RetrievalResult:
     if not policy.retrieval_required:
         return RetrievalResult(documents=[], retrieval_score=0.0, candidate_count=0)
 
@@ -28,7 +28,12 @@ def retrieve_context(query: str, policy) -> RetrievalResult:
         return RetrievalResult(documents=[], retrieval_score=0.0, candidate_count=0)
 
     # 2. Embedding ranking (non-authoritative)
-    ranked_ids = _index.search(query, k=len(candidates))
+    ranked_ids = _index.search(
+    query,
+    k=len(candidates),
+    embedding_model=embedding_model,  # NEW
+    )
+
     ranked_map = {doc_id: score for doc_id, score in ranked_ids}
 
     # 3. Sort candidates by embedding similarity

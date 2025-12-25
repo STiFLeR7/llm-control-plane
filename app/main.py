@@ -10,7 +10,7 @@ from app.generation.generator import generate_answer
 from app.audit.logger import audit_log
 
 
-def handle_request(user_query: str) -> dict:
+def handle_request(user_query: str, embedding_model: str | None = None) -> dict:
     """
     Handle a single user query through the LLM control pipeline.
 
@@ -26,7 +26,12 @@ def handle_request(user_query: str) -> dict:
     policy = resolve_policy(risk)
 
     # 3. Grounded retrieval
-    retrieval = retrieve_context(user_query, policy)
+    retrieval = retrieve_context(
+    user_query,
+    policy,
+    embedding_model=embedding_model,  # NEW
+    )
+
 
     # 4. Confidence scoring
     confidence = score_confidence(retrieval)

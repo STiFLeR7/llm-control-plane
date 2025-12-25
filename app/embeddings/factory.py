@@ -1,14 +1,17 @@
 from app.config import settings
-from app.embeddings.encoder import EmbeddingEncoder
 from app.embeddings.local import LocalEmbeddingEncoder
-from app.embeddings.api import ApiEmbeddingEncoder
+from app.embeddings.bytez import BytezEmbeddingEncoder
 
 
-def get_embedding_encoder() -> EmbeddingEncoder:
-    if settings.embedding_backend == "local":
+def get_embedding_encoder(embedding_model: str | None = None):
+    backend = settings.embedding_backend.lower()
+
+    if backend == "local":
         return LocalEmbeddingEncoder()
 
-    if settings.embedding_backend == "api":
-        return ApiEmbeddingEncoder()
+    if backend == "bytez":
+        return BytezEmbeddingEncoder(
+            model_override=embedding_model
+        )
 
-    raise ValueError(f"Unknown embedding backend: {settings.embedding_backend}")
+    raise ValueError(f"Unknown embedding backend: {backend}")
